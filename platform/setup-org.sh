@@ -2,16 +2,16 @@
 # Platform engineer: set up teams, permissions, protection and environments for a
 # trunk-based repo in a GitHub ORGANIZATION. (The same thing is in platform/terraform/.)
 #
-# Usage:  ./platform/setup-org.sh <practice-org> <repo>
+# Usage:  ./platform/setup-org.sh <sandbox-org> <repo>
 # Optional: add real people to teams (GitHub usernames, space separated):
 #   DEVELOPERS="friend1 friend2" QA="friend3" LEADS="friend4" ./platform/setup-org.sh my-lab-org luul-orders-service
 set -euo pipefail
-ORG="${1:?usage: $0 <practice-org> <repo>}"
-REPO="${2:?usage: $0 <practice-org> <repo>}"
+ORG="${1:?usage: $0 <sandbox-org> <repo>}"
+REPO="${2:?usage: $0 <sandbox-org> <repo>}"
 
-# Safety: this is a PRACTICE script. Never change the real company org by accident.
+# Safety: intended for a sandbox org. Never change the real company org by accident.
 if [[ "$(echo "$ORG" | tr '[:upper:]' '[:lower:]')" == "luul-solutions" && "${ALLOW_REAL_ORG:-}" != "yes" ]]; then
-  echo "STOP: '$ORG' is the real company organization. Use a practice org."
+  echo "STOP: '$ORG' is the real company organization. Use a sandbox org."
   echo "(Only with approval from your lead/admins: ALLOW_REAL_ORG=yes $0 $ORG $REPO)"
   exit 1
 fi

@@ -1,22 +1,22 @@
-# Real team problems and how to solve them
+# Incident drills (game days)
 
-Each scenario script creates a real problem in the team's folders. You solve it by typing the commands.
-**Every solution below was tested end to end.**
+Each drill script reproduces a real incident in a simulated 5-person team. The runbook below resolves it.
+Every runbook below is tested end to end.
 
 ```bash
-cd ~/wezva-ai-driven-bootcamp/git-github/luul-team-project
+# from the repository root
 ./sim/create-team.sh --local          # once: creates ../luul-team-workspace with 5 people
 ./sim/scenarios/s01-commit-on-main.sh # start a scenario (it resets everything first)
 ```
-`W=~/wezva-ai-driven-bootcamp/git-github/luul-team-workspace` (the folder with every person's clone).
-Every scenario starts with a fresh world, so you can repeat each one as many times as you want. To reset by hand: `./sim/reset.sh`.
+`W=../luul-team-workspace` (the folder with every team member's clone, created next to the repo).
+Every scenario starts with a fresh world, so each drill can be repeated. To reset by hand: `./sim/reset.sh`.
 
 > In **local mode**, "merge the PR" means `git push origin HEAD:main`. On real GitHub you would open a PR (`gh pr create`) and merge after checks and approvals. See `docs/GITHUB-MODE.md`.
 
 ---
 
 ## Scenario 1: Bob committed on `main` by mistake
-**Role:** Developer · **Folder:** `$W/bob-dev` · **How often at work:** every week
+**Role:** Developer · **Folder:** `$W/bob-dev` · **Frequency:** common
 
 **Problem:** Bob forgot to branch. He has 2 commits on local `main`. On GitHub, `git push` is rejected:
 `remote: error: GH013: Repository rule violations found for refs/heads/main. Changes must be made through a pull request.`
@@ -34,7 +34,7 @@ git push -u origin feat/LUUL-201-student20   # 3. now open a PR
 ```
 **Why it works:** a branch is just a pointer. The new branch keeps the commits, and the reset only moves `main`.
 **Prevent it (platform):** the ruleset rejects pushes to main. `make hooks` installs a pre-commit hook that says *"do not commit on main"*.
-**Interview:** *"I move the commits to a feature branch, reset local main to origin/main, and open a PR. Our ruleset blocks direct pushes to main, and our pre-commit hook catches it even earlier."*
+**Key point:** *"I move the commits to a feature branch, reset local main to origin/main, and open a PR. Our ruleset blocks direct pushes to main, and our pre-commit hook catches it even earlier."*
 
 ---
 
@@ -75,7 +75,7 @@ git push --force-with-lease                      # safe: fails if someone else p
 ```
 **Careful:** in a **merge**, "ours" = your branch. In a **rebase**, "ours" = the branch you rebase onto. People mix this up all the time.
 **Prevent it:** small PRs that merge the same day. Rebase on `main` every morning (`git pull --rebase origin main`).
-**Interview:** *"I rebase on main, resolve with the other author or the lead when it's a business decision, run tests locally, and push with --force-with-lease. Trunk-based development keeps conflicts small because branches live hours, not weeks."*
+**Key point:** *"I rebase on main, resolve with the other author or the lead when it's a business decision, run tests locally, and push with --force-with-lease. Trunk-based development keeps conflicts small because branches live hours, not weeks."*
 
 ---
 
@@ -101,7 +101,7 @@ git push origin HEAD:main              # (GitHub: PR + fast review, "revert firs
 Then Bob fixes his test the right way in a new PR: `WELCOME10` → `calculate_total(200, "WELCOME10") == 180`.
 
 **Prevent it (platform):** in the ruleset, set **"Require branches to be up to date before merging"** (`strict_required_status_checks_policy: true`, already in `setup-org.sh`). Even better, use a **merge queue**: GitHub tests each PR *combined with* the latest main before merging. `ci.yml` already listens to `merge_group`.
-**Interview:** *"A broken trunk blocks everyone, so the rule is: revert first, then fix forward. I use git bisect to find the commit fast. Then I prevent semantic conflicts with up-to-date checks and a merge queue."*
+**Key point:** *"A broken trunk blocks everyone, so the rule is: revert first, then fix forward. I use git bisect to find the commit fast. Then I prevent semantic conflicts with up-to-date checks and a merge queue."*
 
 ---
 
@@ -129,7 +129,7 @@ git push --force-with-lease                  # replace the branch on GitHub
 **If it was already merged to main:** rotate (done), then rewrite history with `git filter-repo --path config/aws.env --invert-paths`. Coordinate with the whole team (everyone must re-clone) and ask GitHub Support to purge cached views. That's why **rotation** is the real fix.
 
 **Prevent it (platform):** push protection (`setup-org.sh`), the `secret-scan` job (gitleaks), the pre-commit hook (`make hooks`), and **OIDC** so CI never needs static cloud keys.
-**Interview:** *"Rotate first, clean history second. A key on GitHub for even a minute is compromised. Then add push protection and gitleaks, and move CI to OIDC so there are no long-lived keys."*
+**Key point:** *"Rotate first, clean history second. A key on GitHub for even a minute is compromised. Then add push protection and gitleaks, and move CI to OIDC so there are no long-lived keys."*
 
 ---
 
@@ -149,7 +149,7 @@ git show --stat HEAD                     # only code + .gitignore now
 make test
 ```
 **Prevent it:** the pre-commit hook blocks files over 5 MB. For big files you really need, use **Git LFS** (`git lfs track "*.bin"`) or object storage (S3).
-**Interview:** *"Since it wasn't pushed, I amended the commit. If it had been pushed, I'd rewrite the branch with --force-with-lease, or use git filter-repo if it reached main. With possible customer data, it's also a data-protection incident."*
+**Key point:** *"Since it wasn't pushed, I amended the commit. If it had been pushed, I'd rewrite the branch with --force-with-lease, or use git filter-repo if it reached main. With possible customer data, it's also a data-protection incident."*
 
 ---
 
@@ -166,7 +166,7 @@ git log --oneline -3             # both commits are back
 make test-e2e
 git push -u origin qa/LUUL-250-more-e2e     # push often: GitHub is your backup
 ```
-**Interview:** *"git reflog records every HEAD movement locally. Lost commits stay recoverable for 30 days by default, so committed work is almost never lost. I find the commit and reset or branch to it."*
+**Key point:** *"git reflog records every HEAD movement locally. Lost commits stay recoverable for 30 days by default, so committed work is almost never lost. I find the commit and reset or branch to it."*
 
 ---
 
@@ -199,7 +199,7 @@ git push origin --delete feat/big-bang
 git branch -D feat/big-bang
 ```
 **Prevent it:** the CI `branch-age` warning (in luul-trunk-lab), the PR template checklist, and the team agreement: *merge at least daily, hide unfinished work behind flags*.
-**Interview:** *"I split long branches into small PRs by cherry-picking onto fresh branches from main, so each one has one purpose and is easy to review and revert. Flags are turned on in their own PR, approved by the lead and QA."*
+**Key point:** *"I split long branches into small PRs by cherry-picking onto fresh branches from main, so each one has one purpose and is easy to review and revert. Flags are turned on in their own PR, approved by the lead and QA."*
 
 ---
 
@@ -240,7 +240,7 @@ make test
 git commit -am "fix(LUUL-290): accept decimal amounts + regression test"
 git push -u origin HEAD
 ```
-**Interview:** *"QA reproduces the bug as a test, then git bisect finds the guilty commit in a few steps, even among hundreds. We fix forward and keep the regression test so it can't come back."*
+**Key point:** *"QA reproduces the bug as a test, then git bisect finds the guilty commit in a few steps, even among hundreds. We fix forward and keep the regression test so it can't come back."*
 
 ---
 
@@ -261,7 +261,7 @@ git push origin v1.1.1                         # release.yml creates the GitHub 
 git log --oneline v1.1.0..v1.1.1               # ONLY the fix is in the release
 ```
 **Rule:** fix on **trunk first**, then cherry-pick to the release branch. Never fix only the release branch, or the bug comes back in the next version.
-**Interview:** *"We release from trunk with tags. When we must patch an older release, we cherry-pick the fix from main into the release branch, tag a patch version, and the pipeline ships it."*
+**Key point:** *"We release from trunk with tags. When we must patch an older release, we cherry-pick the fix from main into the release branch, tag a patch version, and the pipeline ships it."*
 
 ---
 
