@@ -22,7 +22,7 @@ Local mode (`SCENARIOS.md`) trains your **Git** skills. GitHub mode trains the *
 
    # b) Terraform ("GitHub as code", great for your CV)
    cd platform/terraform
-   cp terraform.tfvars.example terraform.tfvars      # set org = "luul-lab-abdihakim"
+   cp terraform.tfvars.example terraform.tfvars      # set org, and YOUR login as team members
    export GITHUB_TOKEN=$(gh auth token)
    terraform init && terraform plan                  # READ the plan
    terraform apply
@@ -48,7 +48,8 @@ Local mode (`SCENARIOS.md`) trains your **Git** skills. GitHub mode trains the *
 
 ### What you will see (tested on real GitHub)
 - **A brand-new org can be slow at first.** The very first push or PR may start **no workflow run**. Wait a few minutes, or push another commit. After that, runs start within seconds.
-- **You are in all 4 teams.** GitHub adds whoever creates a team as a member. That's handy alone. At a company, remove yourself from teams you don't belong to.
+- **Team members:** the script adds you to all 4 teams automatically (GitHub adds whoever creates a team). **Terraform does not**: put your login in `members` in `terraform.tfvars`, or the teams stay empty and **nobody can approve prod**. The deployment waits forever.
+- **Set up protections BEFORE the first push.** The CD run from the very first push can reach prod without approval, because the prod environment didn't exist yet.
 - **You cannot approve your own PR** (`Can not approve your own pull request`), so practising alone you merge with `gh pr merge --squash --admin` after all checks are green. At work: never `--admin` to skip a red check.
 - **`secret-scan` passes** even though Scenario 4 contains a fake AWS key, because `.gitleaks.toml` allowlists that one training file. Remove it from the allowlist and watch the scanner catch it.
 - **Dependabot opens PRs by itself** within minutes (G9).
