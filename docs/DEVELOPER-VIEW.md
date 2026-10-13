@@ -1,6 +1,6 @@
 # The developer's view and the DevOps view
 
-As a DevOps / platform engineer you serve developers. To help them, you must understand **their** work: the code, the tests, and what they see when something fails. This guide has 4 parts:
+A platform is only as good as the developer experience it gives. This guide covers the delivery workflow from the developer's side and the platform's side, in 4 parts:
 
 1. **The app explained**: every file in simple words
 2. **Developer lab**: build a real feature yourself (tested end to end)
@@ -56,18 +56,18 @@ JSON response             {"total": 180.0}   with status 200 / 400 / 404
 
 ---
 
-## Part 2: Developer lab, build a feature yourself
+## Part 2: Worked example, building a feature end to end
 
 **Ticket LUUL-400:** *"As a customer, I want an order summary: send several item prices and a code, get the subtotal and total."*
 Endpoint: `GET /orders/summary?items=100,50&code=LUUL10` → `{"items": 2, "subtotal": 150.0, "code": "LUUL10", "total": 135.0}`.
 It's not finished for customers yet, so it goes **behind a flag**: `orders_api`.
 
-The reference solution is in `docs/dev-lab-solution/`. Try it yourself first, then compare.
+The reference solution is in `docs/dev-lab-solution/`.
 
 ```bash
-cd ~/wezva-ai-driven-bootcamp/git-github/luul-team-project
+# from the repository root
 ./sim/reset.sh                         # (after ./sim/create-team.sh --local once)
-W=~/wezva-ai-driven-bootcamp/git-github/luul-team-workspace
+W=../luul-team-workspace
 ```
 
 ### Step 1: You are Alice (developer). Start from the latest trunk
@@ -133,7 +133,7 @@ git push -u origin feat/LUUL-400-order-summary     # GitHub: gh pr create --fill
 ```bash
 cd $W/sara-qa
 git fetch && git switch feat/LUUL-400-order-summary
-cp ~/wezva-ai-driven-bootcamp/git-github/luul-team-project/docs/dev-lab-solution/tests/e2e/test_orders_api.py tests/e2e/
+cp <repo>/docs/dev-lab-solution/tests/e2e/test_orders_api.py tests/e2e/
 make test-e2e                                       # Ran 6 tests ... OK
 git add -A && git commit -m "test(LUUL-400): e2e for order summary" && git push
 ```

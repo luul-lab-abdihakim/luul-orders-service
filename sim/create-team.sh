@@ -2,7 +2,7 @@
 # Create one local clone per team member, each with their own git identity.
 #
 #   ./sim/create-team.sh --local                # offline: a local folder acts as "GitHub"
-#   ./sim/create-team.sh <git-remote-url>       # real GitHub repo in your PRACTICE org
+#   ./sim/create-team.sh <git-remote-url>       # real GitHub repo in your sandbox org
 #
 # Result (next to this project):
 #   luul-team-workspace/

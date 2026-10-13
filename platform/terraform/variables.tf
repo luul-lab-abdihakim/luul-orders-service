@@ -1,10 +1,10 @@
 variable "org" {
-  description = "PRACTICE GitHub organization (never the real company org without approval)"
+  description = "Sandbox GitHub organization (never the production org without approval)"
   type        = string
 
   validation {
     condition     = lower(var.org) != "luul-solutions"
-    error_message = "This is a practice config. Do not point it at the real Luul-Solutions org."
+    error_message = "Sandbox config: do not point it at the production Luul-Solutions org."
   }
 }
 

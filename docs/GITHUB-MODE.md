@@ -1,16 +1,16 @@
-# GitHub mode: practise teams, permissions and approvals on real GitHub
+# GitHub setup: teams, permissions and approvals
 
-Local mode (`SCENARIOS.md`) trains your **Git** skills. GitHub mode trains the **platform** part: organizations, teams, rulesets, CODEOWNERS, environments and approvals.
+How to stand up the platform guardrails in a GitHub organization: teams, rulesets, CODEOWNERS, environments and approvals. The incident drills in `SCENARIOS.md` run locally.
 
-> ⚠️ Use a **practice organization**, never the real `Luul-Solutions` org. Changing a company's settings without approval is a serious mistake. The scripts and Terraform refuse to run against `Luul-Solutions`.
+> ⚠️ Run this in a **sandbox organization**. Changing a production organization's settings requires approval. The scripts and Terraform refuse to run against `Luul-Solutions`.
 
 ## Setup (about 20 minutes, free)
 
 0. **Give the GitHub CLI the extra permissions** (once): `gh auth refresh -h github.com -s admin:org,delete_repo`
-1. **Create a free practice org** in the browser: https://github.com/account/organizations/new?plan=free → name e.g. `luul-lab-abdihakim` → "belongs to: My personal account".
+1. **Create a sandbox org** in the browser: https://github.com/account/organizations/new?plan=free → name e.g. `luul-lab-abdihakim` → "belongs to: My personal account".
 2. **Create the repo and push the project:**
    ```bash
-   cd ~/wezva-ai-driven-bootcamp/git-github/luul-team-project
+   # from the repository root
    git init -b main && git add . && git commit -m "chore: initial luul-orders-service"
    gh repo create luul-lab-abdihakim/luul-orders-service --public --source=. --push
    ```
@@ -46,16 +46,16 @@ Local mode (`SCENARIOS.md`) trains your **Git** skills. GitHub mode trains the *
    `DEVELOPERS="friend-login" ./platform/setup-org.sh luul-lab-abdihakim luul-orders-service`
    Alone? You're an **org owner**, so you can use the ruleset **bypass** (break-glass) to merge your own PRs. Notice that GitHub logs every bypass.
 
-### What you will see (tested on real GitHub)
+### Operational notes (verified on GitHub)
 - **A brand-new org can be slow at first.** The very first push or PR may start **no workflow run**. Wait a few minutes, or push another commit. After that, runs start within seconds.
 - **Team members:** the script adds you to all 4 teams automatically (GitHub adds whoever creates a team). **Terraform does not**: put your login in `members` in `terraform.tfvars`, or the teams stay empty and **nobody can approve prod**. The deployment waits forever.
 - **Set up protections BEFORE the first push.** The CD run from the very first push can reach prod without approval, because the prod environment didn't exist yet.
-- **You cannot approve your own PR** (`Can not approve your own pull request`), so practising alone you merge with `gh pr merge --squash --admin` after all checks are green. At work: never `--admin` to skip a red check.
+- **You cannot approve your own PR** (`Can not approve your own pull request`), so With a single maintainer you merge with `gh pr merge --squash --admin` after all checks are green. At work: never `--admin` to skip a red check.
 - **`secret-scan` passes** even though Scenario 4 contains a fake AWS key, because `.gitleaks.toml` allowlists that one training file. Remove it from the allowlist and watch the scanner catch it.
 - **Dependabot opens PRs by itself** within minutes (G9).
 - **Prod waits for approval** from @leads or @platform (G3): Actions → the CD run → **Review deployments**.
 
-## GitHub scenarios
+## Operational scenarios
 
 ### G1: A developer pushes straight to main
 ```bash

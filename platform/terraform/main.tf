@@ -24,6 +24,12 @@ resource "github_team_membership" "this" {
   team_id  = github_team.this[each.value.team].id
   username = each.value.user
   role     = "member"
+
+  # GitHub always reports organization owners as team "maintainer", which would show as
+  # drift on every plan. Ignore role changes so plans stay clean.
+  lifecycle {
+    ignore_changes = [role]
+  }
 }
 
 # ---------------------------------------------------------------- Protect the trunk
