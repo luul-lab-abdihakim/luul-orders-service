@@ -1,2 +1,11 @@
 org  = "luul-lab-yourname"   # your PRACTICE org
 repo = "luul-orders-service"
+
+# Who is in which team. Terraform does NOT add you automatically: if leads/platform are
+# empty, NOBODY can approve a prod deployment. Practising alone? Put your login in all teams.
+teams = {
+  developers = { description = "Write code, open PRs", permission = "push", members = ["your-github-login"] }
+  qa         = { description = "Own e2e tests, review flag changes", permission = "push", members = ["your-github-login"] }
+  leads      = { description = "Review money logic, approve prod", permission = "maintain", members = ["your-github-login"] }
+  platform   = { description = "Pipelines, settings, rulesets", permission = "admin", members = ["your-github-login"] }
+}
