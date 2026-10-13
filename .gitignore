@@ -7,3 +7,5 @@ __pycache__/
 .terraform/
 *.tfstate*
 .DS_Store
+*.tfvars
+!*.tfvars.example

@@ -1,5 +1,5 @@
 # Who must approve changes to which paths. The LAST matching line wins.
-# luul-lab-abdihakim is replaced by platform/setup-org.sh with your practice organization.
+# Teams live in the luul-lab-abdihakim organization (see docs/ROLES.md).
 
 *                       @luul-lab-abdihakim/developers
 /app/pricing.py         @luul-lab-abdihakim/leads           # money logic: lead engineer must approve

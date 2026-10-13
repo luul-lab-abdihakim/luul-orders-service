@@ -26,6 +26,13 @@ Local mode (`SCENARIOS.md`) trains your **Git** skills. GitHub mode trains the *
    export GITHUB_TOKEN=$(gh auth token)
    terraform init && terraform plan                  # READ the plan
    terraform apply
+   cd ../..
+   # Terraform here manages teams, permissions, the ruleset and environments.
+   # Set the repo's merge + security settings with gh (the script does this for you):
+   gh repo edit luul-lab-abdihakim/luul-orders-service --enable-squash-merge --enable-merge-commit=false \
+     --enable-rebase-merge=false --delete-branch-on-merge --allow-update-branch --enable-auto-merge
+   echo '{"security_and_analysis":{"secret_scanning":{"status":"enabled"},"secret_scanning_push_protection":{"status":"enabled"}}}' \
+     | gh api -X PATCH repos/luul-lab-abdihakim/luul-orders-service --input -
    ```
    Use only ONE way. If you ran the script first, Terraform fails with "name already exists". Delete the teams, ruleset and environments first, or use `terraform import`.
 4. **Fix CODEOWNERS** in your first PR (good first trunk-based change):
