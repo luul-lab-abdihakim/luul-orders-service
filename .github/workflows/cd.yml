@@ -36,7 +36,7 @@ jobs:
         run: |
           sha=$(git rev-parse --short=7 HEAD)
           echo "image=ghcr.io/${GITHUB_REPOSITORY,,}:${sha}" >> "$GITHUB_OUTPUT"
-      - uses: docker/login-action@v3
+      - uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -67,7 +67,7 @@ jobs:
         with:
           ref: ${{ inputs.sha || github.sha }}   # tests + staging.env from the same commit as the image
       - run: ./scripts/deploy.sh staging ${{ needs.build.outputs.image }}
-      - uses: docker/login-action@v3     # the image is private: log in before pulling it
+      - uses: docker/login-action@v4     # the image is private: log in before pulling it
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
