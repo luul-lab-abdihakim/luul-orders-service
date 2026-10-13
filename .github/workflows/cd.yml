@@ -26,7 +26,7 @@ jobs:
     outputs:
       image: ${{ steps.meta.outputs.image }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.sha || github.sha }}
       - uses: actions/setup-python@v5
@@ -53,7 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: dev
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.sha || github.sha }}   # same commit as the image
       - run: ./scripts/deploy.sh dev ${{ needs.build.outputs.image }}
@@ -63,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: staging
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.sha || github.sha }}   # tests + staging.env from the same commit as the image
       - run: ./scripts/deploy.sh staging ${{ needs.build.outputs.image }}
@@ -83,7 +83,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: prod        # required reviewers: leads + platform
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.sha || github.sha }}
       - run: ./scripts/deploy.sh prod ${{ needs.build.outputs.image }}
