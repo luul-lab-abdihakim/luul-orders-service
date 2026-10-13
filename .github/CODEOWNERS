@@ -1,0 +1,13 @@
+# Who must approve changes to which paths. The LAST matching line wins.
+# ORG_NAME is replaced by platform/setup-org.sh with your practice organization.
+
+*                       @ORG_NAME/developers
+/app/pricing.py         @ORG_NAME/leads           # money logic: lead engineer must approve
+/config/flags.json      @ORG_NAME/leads @ORG_NAME/qa   # turning features on needs lead + QA
+/tests/e2e/             @ORG_NAME/qa              # QA owns end-to-end tests
+/.github/               @ORG_NAME/platform        # pipelines and repo settings
+/platform/              @ORG_NAME/platform
+/deploy/                @ORG_NAME/platform @ORG_NAME/leads   # per-environment settings
+/Dockerfile             @ORG_NAME/platform
+/.github/CODEOWNERS     @ORG_NAME/platform @ORG_NAME/leads
+/.gitleaks.toml         @ORG_NAME/platform            # secret-scan allowlist

@@ -1,0 +1,10 @@
+# Settings for the secret-scan job (gitleaks). Owned by platform.
+# Keep all the normal rules, and allow ONE known file: the training scenario that
+# creates a fake AWS key on purpose (AWS's documented example key, not a real one).
+# At a company: allowlist only test data, give the reason, and review every change here.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Fake keys used on purpose by training scenario 4"
+paths = ['''sim/scenarios/s04-secret-leak\.sh''']

@@ -1,0 +1,7 @@
+.git
+.github
+tests
+docs
+sim
+platform
+__pycache__

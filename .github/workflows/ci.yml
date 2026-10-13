@@ -1,0 +1,59 @@
+# CI for every pull request into main (the trunk).
+# Every job below is a REQUIRED status check in the ruleset, so a PR cannot merge
+# unless developers' tests, QA's e2e tests, the build and the secret scan all pass.
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  merge_group:            # runs when a PR enters the merge queue
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    name: unit-tests            # owned by developers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: make test-unit
+
+  e2e:
+    name: e2e-tests             # owned by QA
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: make test-e2e
+
+  build:
+    name: docker-build          # owned by platform
+    needs: [unit]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build --build-arg GIT_SHA=${{ github.sha }} -t luul-orders-service:ci .
+      - name: Container smoke test
+        run: |
+          docker run -d --name app -p 8080:8080 luul-orders-service:ci
+          for i in $(seq 1 20); do curl -fsS localhost:8080/health && exit 0; sleep 1; done
+          docker logs app; exit 1
+
+  secret-scan:
+    name: secret-scan           # owned by platform / security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Gitleaks
+        run: |
+          docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.18.4 \
+            detect --source /repo --no-banner --redact -v

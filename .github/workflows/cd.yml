@@ -1,0 +1,89 @@
+# CD: every commit on main is built ONCE and promoted:
+#   dev (automatic) -> staging (automatic + QA e2e run against it) -> prod (lead/platform approval)
+# Who can approve is set on the GitHub environments (see platform/).
+name: CD
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: "Rollback: the FULL 40-character commit SHA to redeploy (git rev-parse <short-sha>). Empty = latest."
+        required: false
+
+concurrency:
+  group: cd-main
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: make test
+      - id: meta
+        run: |
+          sha=$(git rev-parse --short=7 HEAD)
+          echo "image=ghcr.io/${GITHUB_REPOSITORY,,}:${sha}" >> "$GITHUB_OUTPUT"
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.image }}
+          build-args: GIT_SHA=${{ inputs.sha || github.sha }}
+
+  deploy-dev:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.sha || github.sha }}   # same commit as the image
+      - run: ./scripts/deploy.sh dev ${{ needs.build.outputs.image }}
+
+  deploy-staging:
+    needs: [build, deploy-dev]
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.sha || github.sha }}   # tests + staging.env from the same commit as the image
+      - run: ./scripts/deploy.sh staging ${{ needs.build.outputs.image }}
+      - uses: docker/login-action@v3     # the image is private: log in before pulling it
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: QA e2e tests against the staging container
+        run: |
+          docker run -d --name staging -p 8080:8080 --env-file deploy/staging.env ${{ needs.build.outputs.image }}
+          for i in $(seq 1 20); do curl -fsS localhost:8080/health && break; sleep 1; done
+          BASE_URL=http://localhost:8080 make test-e2e
+
+  deploy-prod:
+    needs: [build, deploy-staging]
+    runs-on: ubuntu-latest
+    environment: prod        # required reviewers: leads + platform
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.sha || github.sha }}
+      - run: ./scripts/deploy.sh prod ${{ needs.build.outputs.image }}
