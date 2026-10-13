@@ -1,13 +1,13 @@
 # Who must approve changes to which paths. The LAST matching line wins.
-# ORG_NAME is replaced by platform/setup-org.sh with your practice organization.
+# luul-lab-abdihakim is replaced by platform/setup-org.sh with your practice organization.
 
-*                       @ORG_NAME/developers
-/app/pricing.py         @ORG_NAME/leads           # money logic: lead engineer must approve
-/config/flags.json      @ORG_NAME/leads @ORG_NAME/qa   # turning features on needs lead + QA
-/tests/e2e/             @ORG_NAME/qa              # QA owns end-to-end tests
-/.github/               @ORG_NAME/platform        # pipelines and repo settings
-/platform/              @ORG_NAME/platform
-/deploy/                @ORG_NAME/platform @ORG_NAME/leads   # per-environment settings
-/Dockerfile             @ORG_NAME/platform
-/.github/CODEOWNERS     @ORG_NAME/platform @ORG_NAME/leads
-/.gitleaks.toml         @ORG_NAME/platform            # secret-scan allowlist
+*                       @luul-lab-abdihakim/developers
+/app/pricing.py         @luul-lab-abdihakim/leads           # money logic: lead engineer must approve
+/config/flags.json      @luul-lab-abdihakim/leads @luul-lab-abdihakim/qa   # turning features on needs lead + QA
+/tests/e2e/             @luul-lab-abdihakim/qa              # QA owns end-to-end tests
+/.github/               @luul-lab-abdihakim/platform        # pipelines and repo settings
+/platform/              @luul-lab-abdihakim/platform
+/deploy/                @luul-lab-abdihakim/platform @luul-lab-abdihakim/leads   # per-environment settings
+/Dockerfile             @luul-lab-abdihakim/platform
+/.github/CODEOWNERS     @luul-lab-abdihakim/platform @luul-lab-abdihakim/leads
+/.gitleaks.toml         @luul-lab-abdihakim/platform            # secret-scan allowlist
