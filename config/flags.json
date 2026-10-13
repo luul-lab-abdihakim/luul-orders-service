@@ -1,3 +1,4 @@
 {
-  "discounts_v2": false
+  "discounts_v2": false,
+  "orders_api": false
 }

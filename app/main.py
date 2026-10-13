@@ -11,6 +11,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
+from app.orders import summarize
 from app.pricing import calculate_total
 
 VERSION = "1.0.0"
@@ -46,6 +47,18 @@ def route(raw_path):
         except ValueError as err:
             return 400, {"error": str(err)}
         return 200, {"amount": amount, "code": code, "total": total}
+    if url.path == "/orders/summary":
+        flags = load_flags()
+        if not flags.get("orders_api"):          # feature OFF -> behave as if it doesn't exist
+            return 404, {"error": "not found"}
+        query = parse_qs(url.query)
+        try:
+            raw = query.get("items", [""])[0]    # e.g. "100,50.5"
+            prices = [float(p) for p in raw.split(",") if p.strip()]
+            summary = summarize(prices, query.get("code", [None])[0], flags)
+        except ValueError as err:
+            return 400, {"error": str(err)}
+        return 200, summary
     return 404, {"error": "not found"}
 
 
