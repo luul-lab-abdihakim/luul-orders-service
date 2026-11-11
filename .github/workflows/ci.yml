@@ -20,7 +20,7 @@ jobs:
     name: unit-tests            # owned by developers
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: make test-unit
@@ -29,7 +29,7 @@ jobs:
     name: e2e-tests             # owned by QA
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: make test-e2e
@@ -39,7 +39,7 @@ jobs:
     needs: [unit]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: docker build --build-arg GIT_SHA=${{ github.sha }} -t luul-orders-service:ci .
       - name: Container smoke test
         run: |
@@ -51,7 +51,7 @@ jobs:
     name: secret-scan           # owned by platform / security
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { fetch-depth: 0 }
       - name: Gitleaks
         run: |
